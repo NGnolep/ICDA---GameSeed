@@ -15,6 +15,7 @@ public class GhostChase : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Vector2 roamTarget;
     private float roamTimer;
+    public PlayerBar bar;
 
     public void Start()
     {
@@ -33,11 +34,13 @@ public class GhostChase : MonoBehaviour
 
         if (distance < chaseDistance)
         {
+            bar.isBeingChased = true;
             Vector2 direction = (player.position - transform.position).normalized;
             transform.position += (Vector3)(direction * speed * Time.deltaTime);
         }
         else
         {
+            bar.isBeingChased = false;
             roamTimer -= Time.deltaTime;
             if (roamTimer <= 0f || Vector2.Distance(transform.position, roamTarget) < 0.1f)
             {

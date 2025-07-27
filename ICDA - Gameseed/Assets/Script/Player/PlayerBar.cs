@@ -15,6 +15,8 @@ public class PlayerBar : MonoBehaviour
 
     public float staminaRegenRate = 3f;
     public float sanityDegradeRate = 0.2f;
+    public bool isBeingChased = false;
+    public float chaseSanityMultiplier = 3f;
     private Coroutine regenCoroutine;
     void Start()
     {
@@ -26,7 +28,10 @@ public class PlayerBar : MonoBehaviour
     }
     void Update()
     {
-        currentSanity -= sanityDegradeRate * Time.deltaTime;
+        float drainRate = isBeingChased ? sanityDegradeRate * chaseSanityMultiplier : sanityDegradeRate;
+        currentSanity -= drainRate * Time.deltaTime;
+        Debug.Log(currentSanity);
+        Debug.Log(drainRate);
         currentSanity = Mathf.Clamp(currentSanity, 0, maxSanity);
         //Debug.Log(currentSanity);
         //sanitySlider.value = currentSanity;

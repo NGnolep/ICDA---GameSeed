@@ -21,12 +21,12 @@ public class PlayerMovement : MonoBehaviour
         {
             currentSpeed = sprintSpeed;
             bar.UseStamina(10f * Time.deltaTime);
-            Debug.Log(bar.currentStamina);
+            //Debug.Log(bar.currentStamina);
         }
         else
         {
             currentSpeed = moveSpeed;
-            Debug.Log(bar.currentStamina);
+            //Debug.Log(bar.currentStamina);
         }
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
