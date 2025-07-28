@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float sprintSpeed = 10f;
+    public float moveSpeed = 1f;
+    public float sprintSpeed = 3f;
     public float currentSpeed;
+    public float horizontalMultiplier = 1.5f;
     private Rigidbody2D rb;
     private Vector2 movement;
     public PlayerBar bar;
@@ -33,13 +34,24 @@ public class PlayerMovement : MonoBehaviour
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
-        rb.velocity = movement * currentSpeed;
+        //rb.velocity = movement * currentSpeed;
+        
+      
 
         if (animator != null)
         {
             animator.SetFloat("MoveX", movement.x);
             animator.SetFloat("MoveY", movement.y);
             animator.SetBool("isMoving", movement.magnitude > 0.01f);
+
         }
+
+
+    }
+
+    public void FixedUpdate()
+    {
+        Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
+        rb.velocity = finalVelocity * currentSpeed;
     }
 }
