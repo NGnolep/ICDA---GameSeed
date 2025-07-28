@@ -10,10 +10,12 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movement;
     public PlayerBar bar;
+    private Animator animator;
     private Coroutine regenCoroutine;
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
     public void Update()
     {
@@ -32,5 +34,12 @@ public class PlayerMovement : MonoBehaviour
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
         rb.velocity = movement * currentSpeed;
+
+        if (animator != null)
+        {
+            animator.SetFloat("MoveX", movement.x);
+            animator.SetFloat("MoveY", movement.y);
+            animator.SetBool("isMoving", movement.magnitude > 0.01f);
+        }
     }
 }
