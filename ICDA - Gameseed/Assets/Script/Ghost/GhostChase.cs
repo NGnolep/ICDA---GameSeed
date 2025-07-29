@@ -18,6 +18,7 @@ public class GhostChase : MonoBehaviour
     private float roamTimer;
     public PlayerBar bar;
     private Animator animator;
+    public bool See = true;
 
     public void Start()
     {
@@ -35,7 +36,7 @@ public class GhostChase : MonoBehaviour
         color.a = alpha;
         spriteRenderer.color = color;
 
-        if (distance < chaseDistance)
+        if (distance < chaseDistance && See)
         {
             bar.isBeingChased = true;
             moveDir = (player.position - transform.position).normalized;

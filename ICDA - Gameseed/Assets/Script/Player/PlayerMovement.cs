@@ -13,10 +13,17 @@ public class PlayerMovement : MonoBehaviour
     public PlayerBar bar;
     private Animator animator;
     private Coroutine regenCoroutine;
+    private SpriteRenderer rend;
+    private bool canHide = false;
+    private bool hiding = false;
+    public GhostChase GhostScript;
+    public bool NowHide = false;
+
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+        rend = GetComponent<SpriteRenderer>();
     }
     public void Update()
     {
@@ -34,6 +41,35 @@ public class PlayerMovement : MonoBehaviour
         movement.x = Input.GetAxisRaw("Horizontal");
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
+
+        if (Input.GetKeyDown(KeyCode.E) && canHide && !NowHide)
+        {
+            NowHide = true;
+        }
+        else if (Input.GetKeyDown(KeyCode.E) && NowHide)
+        {
+            NowHide = false;
+            rend.renderingLayerMask = 2;
+            hiding = false;
+            Debug.Log("not hiding");
+            GhostScript.See = true;
+        }
+
+        if (NowHide)
+        {
+            rend.renderingLayerMask = 0;
+            hiding = true;
+            GhostScript.See = false;
+            Debug.Log("Hiding now");
+        }
+        
+        
+
+        
+        
+        
+            
+        
         //rb.velocity = movement * currentSpeed;
 
 
@@ -51,8 +87,15 @@ public class PlayerMovement : MonoBehaviour
 
     public void FixedUpdate()
     {
-        Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
-        rb.velocity = finalVelocity * currentSpeed;
+        if (!hiding)
+        {
+            Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
+            rb.velocity = finalVelocity * currentSpeed;
+        }
+        else
+        {
+            rb.velocity = Vector2.zero;
+        }
     }
 
     void LateUpdate()
@@ -61,5 +104,24 @@ public class PlayerMovement : MonoBehaviour
         pos.z = pos.y;
         transform.position = pos;
     }
+
+    public void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("TheLocker"))
+        {
+            canHide = true;
+            Debug.Log("Can Hide");
+        }
+    }
+
+    public void OnTriggerExit2D(Collider2D other)
+    {
+        if (other.gameObject.CompareTag("TheLocker"))
+        {
+            canHide = false;
+        }
+    }
+
+    
 }
 

@@ -30,8 +30,8 @@ public class PlayerBar : MonoBehaviour
     {
         float drainRate = isBeingChased ? sanityDegradeRate * chaseSanityMultiplier : sanityDegradeRate;
         currentSanity -= drainRate * Time.deltaTime;
-        Debug.Log(currentSanity);
-        Debug.Log(drainRate);
+        //Debug.Log(currentSanity);
+        //Debug.Log(drainRate);
         currentSanity = Mathf.Clamp(currentSanity, 0, maxSanity);
         //Debug.Log(currentSanity);
         //sanitySlider.value = currentSanity;
