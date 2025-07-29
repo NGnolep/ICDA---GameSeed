@@ -35,8 +35,8 @@ public class PlayerMovement : MonoBehaviour
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
         //rb.velocity = movement * currentSpeed;
-        
-      
+
+
 
         if (animator != null)
         {
@@ -54,4 +54,12 @@ public class PlayerMovement : MonoBehaviour
         Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
         rb.velocity = finalVelocity * currentSpeed;
     }
+
+    void LateUpdate()
+    {
+        Vector3 pos = transform.position;
+        pos.z = pos.y;
+        transform.position = pos;
+    }
 }
+
