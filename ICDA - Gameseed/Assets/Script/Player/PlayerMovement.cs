@@ -97,14 +97,6 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector2.zero;
         }
     }
-
-    void LateUpdate()
-    {
-        Vector3 pos = transform.position;
-        pos.z = pos.y;
-        transform.position = pos;
-    }
-
     public void OnTriggerEnter2D(Collider2D other)
     {
         if (other.gameObject.CompareTag("TheLocker"))
