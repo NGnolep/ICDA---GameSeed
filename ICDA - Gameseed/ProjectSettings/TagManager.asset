@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Ghostly
   - TheLocker
+  - TheDoor
+  - Griddy
   layers:
   - Default
   - TransparentFX

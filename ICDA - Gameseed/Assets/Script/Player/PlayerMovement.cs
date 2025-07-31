@@ -11,20 +11,17 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Vector2 movement;
     public PlayerBar bar;
+    public PlayerHiding hid;
     private Animator animator;
     private Coroutine regenCoroutine;
-    private SpriteRenderer rend;
-    private bool canHide = false;
-    private bool hiding = false;
-    public GhostChase GhostScript;
-    public bool NowHide = false;
 
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        rend = GetComponent<SpriteRenderer>();
+        hid = GetComponent<PlayerHiding>();
     }
+
     public void Update()
     {
         if (Input.GetKey(KeyCode.LeftShift) && bar != null && bar.currentStamina > 0)
@@ -42,33 +39,7 @@ public class PlayerMovement : MonoBehaviour
         movement.y = Input.GetAxisRaw("Vertical");
         movement.Normalize();
 
-        if (Input.GetKeyDown(KeyCode.E) && canHide && !NowHide)
-        {
-            NowHide = true;
-        }
-        else if (Input.GetKeyDown(KeyCode.E) && NowHide)
-        {
-            NowHide = false;
-            rend.renderingLayerMask = 2;
-            hiding = false;
-            Debug.Log("not hiding");
-            GhostScript.See = true;
-        }
-
-        if (NowHide)
-        {
-            rend.renderingLayerMask = 0;
-            hiding = true;
-            GhostScript.See = false;
-            Debug.Log("Hiding now");
-        }
         
-        
-
-        
-        
-        
-            
         
         //rb.velocity = movement * currentSpeed;
 
@@ -87,7 +58,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (!hiding)
+        if (hid.hiding == false)
         {
             Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
             rb.velocity = finalVelocity * currentSpeed;
@@ -97,23 +68,6 @@ public class PlayerMovement : MonoBehaviour
             rb.velocity = Vector2.zero;
         }
     }
-    public void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("TheLocker"))
-        {
-            canHide = true;
-            Debug.Log("Can Hide");
-        }
-    }
-
-    public void OnTriggerExit2D(Collider2D other)
-    {
-        if (other.gameObject.CompareTag("TheLocker"))
-        {
-            canHide = false;
-        }
-    }
-
     
 }
 

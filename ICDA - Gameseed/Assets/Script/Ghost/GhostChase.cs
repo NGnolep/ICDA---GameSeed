@@ -19,9 +19,11 @@ public class GhostChase : MonoBehaviour
     public PlayerBar bar;
     private Animator animator;
     public bool See = true;
+    private Rigidbody2D rb;
 
     public void Start()
     {
+        rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         PickNewRoamTarget();
@@ -29,7 +31,8 @@ public class GhostChase : MonoBehaviour
 
     public void Update()
     {
-        float distance = Vector2.Distance(transform.position, player.position);
+        Vector2 newPosition = rb.position;
+        float distance = Vector2.Distance(newPosition, player.position);
         Vector2 moveDir = Vector2.zero;
         float alpha = Mathf.Clamp01(1 - (distance / fadeDistance));
         Color color = spriteRenderer.color;
@@ -39,21 +42,23 @@ public class GhostChase : MonoBehaviour
         if (distance < chaseDistance && See)
         {
             bar.isBeingChased = true;
-            moveDir = (player.position - transform.position).normalized;
-            transform.position += (Vector3)(moveDir * speed * Time.deltaTime);
+            moveDir = ((Vector2)player.position - newPosition).normalized;
+            newPosition = rb.position + moveDir * speed * Time.deltaTime;
         }
         else
         {
             bar.isBeingChased = false;
             roamTimer -= Time.deltaTime;
-            if (roamTimer <= 0f || Vector2.Distance(transform.position, roamTarget) < 0.1f)
+            if (roamTimer <= 0f || Vector2.Distance(newPosition, roamTarget) < 0.1f)
             {
                 PickNewRoamTarget();
             }
 
-            moveDir = (roamTarget - (Vector2)transform.position).normalized;
-            transform.position += (Vector3)(moveDir * speed * 0.5f * Time.deltaTime); // roam slower
+            moveDir = (roamTarget - (Vector2)newPosition).normalized;
+            newPosition = rb.position + moveDir * (speed * 0.5f) * Time.deltaTime; // roam slower
         }
+
+        rb.MovePosition(newPosition);
 
         if (animator != null)
         {
@@ -68,7 +73,7 @@ public class GhostChase : MonoBehaviour
     public void PickNewRoamTarget()
     {
         Vector2 randomDirection = Random.insideUnitCircle.normalized * Random.Range(1f, roamRadius);
-        roamTarget = (Vector2)transform.position + randomDirection;
+        roamTarget = rb.position + randomDirection;
         roamTimer = roamTime;
     }
 }
