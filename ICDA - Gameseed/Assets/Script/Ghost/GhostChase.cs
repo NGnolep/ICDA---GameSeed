@@ -20,60 +20,172 @@ public class GhostChase : MonoBehaviour
     private Animator animator;
     public bool See = true;
     private Rigidbody2D rb;
+    public List<Waypoint> allWaypoints;
+    private List<Waypoint> currentPath = new List<Waypoint>();
+    private int currentPathIndex = 0;
+    private Waypoint currentWaypoint;
+    private bool isChasing = false;
+    private float pathUpdateCooldown = 1f;
+    private float pathUpdateTimer = 0f;
 
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
-        PickNewRoamTarget();
+        PickRandomRoamPath();
     }
 
     public void Update()
     {
-        Vector2 newPosition = rb.position;
-        float distance = Vector2.Distance(newPosition, player.position);
-        Vector2 moveDir = Vector2.zero;
+        float distance = Vector2.Distance(transform.position, player.position);
+        UpdateFade(distance);
+
+        if (distance < chaseDistance && See)
+        {
+            if (!isChasing)
+            {
+                isChasing = true;
+                pathUpdateTimer = 0f;
+            }
+
+            bar.isBeingChased = true;
+
+            pathUpdateTimer -= Time.deltaTime;
+            if (pathUpdateTimer <= 0f)
+            {
+                pathUpdateTimer = pathUpdateCooldown;
+                UpdatePathToPlayer();
+            }
+        }
+        else
+        {
+            if (isChasing)
+            {
+                isChasing = false;
+                PickRandomRoamPath();
+            }
+
+            bar.isBeingChased = false;
+        }
+        MoveAlongPath();
+    }
+
+    void UpdateFade(float distance)
+    {
         float alpha = Mathf.Clamp01(1 - (distance / fadeDistance));
         Color color = spriteRenderer.color;
         color.a = alpha;
         spriteRenderer.color = color;
-
-        if (distance < chaseDistance && See)
-        {
-            bar.isBeingChased = true;
-            moveDir = ((Vector2)player.position - newPosition).normalized;
-            newPosition = rb.position + moveDir * speed * Time.deltaTime;
-        }
-        else
-        {
-            bar.isBeingChased = false;
-            roamTimer -= Time.deltaTime;
-            if (roamTimer <= 0f || Vector2.Distance(newPosition, roamTarget) < 0.1f)
-            {
-                PickNewRoamTarget();
-            }
-
-            moveDir = (roamTarget - (Vector2)newPosition).normalized;
-            newPosition = rb.position + moveDir * (speed * 0.5f) * Time.deltaTime; // roam slower
-        }
-
-        rb.MovePosition(newPosition);
-
-        if (animator != null)
-        {
-            animator.SetBool("isMoving", moveDir.magnitude > 0.01f);
-        }
-        if (spriteRenderer != null && moveDir.x != 0)
-        {
-            spriteRenderer.flipX = moveDir.x < 0; 
-        }
     }
 
-    public void PickNewRoamTarget()
+    void MoveAlongPath()
     {
-        Vector2 randomDirection = Random.insideUnitCircle.normalized * Random.Range(1f, roamRadius);
-        roamTarget = rb.position + randomDirection;
-        roamTimer = roamTime;
+        if (currentPath == null || currentPath.Count == 0 || currentPathIndex >= currentPath.Count)
+            return;
+
+        Vector2 target = currentPath[currentPathIndex].transform.position;
+        Vector2 direction = (target - (Vector2)transform.position).normalized;
+        rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+
+        if (animator != null)
+            animator.SetBool("isMoving", direction.magnitude > 0.01f);
+        if (spriteRenderer != null && direction.x != 0)
+            spriteRenderer.flipX = direction.x < 0;
+
+        if (Vector2.Distance(transform.position, target) < 0.1f)
+            currentPathIndex++;
+    }
+
+    void UpdatePathToPlayer()
+    {
+        Waypoint start = FindClosestWaypoint(transform.position);
+        Waypoint end = FindClosestWaypoint(player.position);
+        currentPath = FindPath(start, end);
+        currentPathIndex = 0;
+    }
+
+    void PickRandomRoamPath()
+    {
+        Waypoint start = FindClosestWaypoint(transform.position);
+        Waypoint end = allWaypoints[Random.Range(0, allWaypoints.Count)];
+        currentPath = FindPath(start, end);
+        currentPathIndex = 0;
+    }
+
+    Waypoint FindClosestWaypoint(Vector2 position)
+    {
+        float minDist = float.MaxValue;
+        Waypoint closest = null;
+        foreach (Waypoint wp in allWaypoints)
+        {
+            float dist = Vector2.Distance(position, wp.transform.position);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = wp;
+            }
+        }
+        return closest;
+    }
+
+    List<Waypoint> FindPath(Waypoint start, Waypoint goal)
+    {
+        List<Waypoint> openSet = new List<Waypoint> { start };
+        Dictionary<Waypoint, Waypoint> cameFrom = new Dictionary<Waypoint, Waypoint>();
+        Dictionary<Waypoint, float> gScore = new Dictionary<Waypoint, float>();
+        Dictionary<Waypoint, float> fScore = new Dictionary<Waypoint, float>();
+
+        foreach (Waypoint wp in allWaypoints)
+        {
+            gScore[wp] = float.MaxValue;
+            fScore[wp] = float.MaxValue;
+        }
+
+        gScore[start] = 0;
+        fScore[start] = Vector2.Distance(start.transform.position, goal.transform.position);
+
+        while (openSet.Count > 0)
+        {
+            Waypoint current = openSet[0];
+            foreach (Waypoint wp in openSet)
+            {
+                if (fScore[wp] < fScore[current])
+                    current = wp;
+            }
+
+            if (current == goal)
+                return ReconstructPath(cameFrom, current);
+
+            openSet.Remove(current);
+
+            foreach (Waypoint neighbor in current.neighbors)
+            {
+                float tentativeG = gScore[current] + Vector2.Distance(current.transform.position, neighbor.transform.position);
+
+                if (tentativeG < gScore[neighbor])
+                {
+                    cameFrom[neighbor] = current;
+                    gScore[neighbor] = tentativeG;
+                    fScore[neighbor] = tentativeG + Vector2.Distance(neighbor.transform.position, goal.transform.position);
+
+                    if (!openSet.Contains(neighbor))
+                        openSet.Add(neighbor);
+                }
+            }
+        }
+
+        return new List<Waypoint>(); // No path found
+    }
+
+    List<Waypoint> ReconstructPath(Dictionary<Waypoint, Waypoint> cameFrom, Waypoint current)
+    {
+        List<Waypoint> totalPath = new List<Waypoint> { current };
+        while (cameFrom.ContainsKey(current))
+        {
+            current = cameFrom[current];
+            totalPath.Insert(0, current);
+        }
+        return totalPath;
     }
 }
