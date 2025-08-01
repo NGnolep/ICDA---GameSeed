@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GhostChase : MonoBehaviour
@@ -27,6 +26,11 @@ public class GhostChase : MonoBehaviour
     private bool isChasing = false;
     private float pathUpdateCooldown = 1f;
     private float pathUpdateTimer = 0f;
+    private Vector2 lastPlayerPosition;
+    private Vector2 lastPosition;
+    private float stuckTimer = 0f;
+    public float stuckCheckInterval = 1f; // how long before deciding it's stuck
+    public float stuckDistanceThreshold = 0.05f;
 
     public void Start()
     {
@@ -46,31 +50,75 @@ public class GhostChase : MonoBehaviour
             if (!isChasing)
             {
                 isChasing = true;
-                pathUpdateTimer = 0f;
             }
 
             bar.isBeingChased = true;
 
-            pathUpdateTimer -= Time.deltaTime;
-            if (pathUpdateTimer <= 0f)
-            {
-                pathUpdateTimer = pathUpdateCooldown;
-                UpdatePathToPlayer();
-            }
+            // Chase directly
+            MoveDirectlyToPlayer();
         }
         else
         {
             if (isChasing)
             {
                 isChasing = false;
-                PickRandomRoamPath();
+                PickRandomRoamPath(); // Resume roaming
             }
 
             bar.isBeingChased = false;
+            MoveAlongPath(); // Roaming
         }
-        MoveAlongPath();
+        CheckIfStuck();
+    }
+    void MoveDirectlyToPlayer()
+    {
+        Vector2 direction = (player.position - transform.position).normalized;
+
+        Vector2 nextPosition = rb.position + direction * speed * Time.deltaTime;
+
+        RaycastHit2D hit = Physics2D.Raycast(rb.position, direction, 0.2f, LayerMask.GetMask("Wall"));
+        if (hit.collider == null)
+        {
+            rb.MovePosition(nextPosition);
+        }
+
+        if (animator != null)
+            animator.SetBool("isMoving", direction.magnitude > 0.01f);
+        if (spriteRenderer != null && direction.x != 0)
+            spriteRenderer.flipX = direction.x < 0;
     }
 
+    void CheckIfStuck()
+    {
+        float movedDistance = Vector2.Distance(transform.position, lastPosition);
+
+        if (movedDistance < stuckDistanceThreshold)
+        {
+            stuckTimer += Time.deltaTime;
+            if (stuckTimer >= stuckCheckInterval)
+            {
+                stuckTimer = 0f;
+                ForcePickNeighborWaypoint();
+            }
+        }
+        else
+        {
+            stuckTimer = 0f;
+            lastPosition = transform.position;
+        }
+    }
+
+    void ForcePickNeighborWaypoint()
+    {
+        Waypoint current = FindClosestWaypoint(transform.position);
+        if (current != null && current.neighbors.Count > 0)
+        {
+            Waypoint randomNeighbor = current.neighbors[Random.Range(0, current.neighbors.Count)];
+            currentPath = new List<Waypoint> { randomNeighbor };
+            currentPathIndex = 0;
+            Debug.Log("Ghost stuck — picking neighbor waypoint to escape.");
+        }
+    }
     void UpdateFade(float distance)
     {
         float alpha = Mathf.Clamp01(1 - (distance / fadeDistance));
@@ -86,7 +134,18 @@ public class GhostChase : MonoBehaviour
 
         Vector2 target = currentPath[currentPathIndex].transform.position;
         Vector2 direction = (target - (Vector2)transform.position).normalized;
-        rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+
+        Vector2 nextPosition = rb.position + direction * speed * Time.deltaTime;
+        RaycastHit2D hit = Physics2D.Raycast(rb.position, direction, 0.05f, LayerMask.GetMask("Wall"));
+        if (hit.collider == null)
+        {
+            rb.MovePosition(nextPosition);
+        }
+        else
+        {
+            pathUpdateTimer = 0f; 
+            return;
+        }
 
         if (animator != null)
             animator.SetBool("isMoving", direction.magnitude > 0.01f);
@@ -101,15 +160,23 @@ public class GhostChase : MonoBehaviour
     {
         Waypoint start = FindClosestWaypoint(transform.position);
         Waypoint end = FindClosestWaypoint(player.position);
-        currentPath = FindPath(start, end);
+        currentPath = AStarPathFinder.FindPath(start, end);
         currentPathIndex = 0;
     }
 
     void PickRandomRoamPath()
     {
         Waypoint start = FindClosestWaypoint(transform.position);
-        Waypoint end = allWaypoints[Random.Range(0, allWaypoints.Count)];
-        currentPath = FindPath(start, end);
+        Waypoint end = null;
+        int attempts = 10;
+
+        while (attempts-- > 0)
+        {
+            end = allWaypoints[Random.Range(0, allWaypoints.Count)];
+            if (Vector2.Distance(start.transform.position, end.transform.position) > 1f) break;
+        }
+
+        currentPath = AStarPathFinder.FindPath(start, end);
         currentPathIndex = 0;
     }
 
@@ -127,65 +194,5 @@ public class GhostChase : MonoBehaviour
             }
         }
         return closest;
-    }
-
-    List<Waypoint> FindPath(Waypoint start, Waypoint goal)
-    {
-        List<Waypoint> openSet = new List<Waypoint> { start };
-        Dictionary<Waypoint, Waypoint> cameFrom = new Dictionary<Waypoint, Waypoint>();
-        Dictionary<Waypoint, float> gScore = new Dictionary<Waypoint, float>();
-        Dictionary<Waypoint, float> fScore = new Dictionary<Waypoint, float>();
-
-        foreach (Waypoint wp in allWaypoints)
-        {
-            gScore[wp] = float.MaxValue;
-            fScore[wp] = float.MaxValue;
-        }
-
-        gScore[start] = 0;
-        fScore[start] = Vector2.Distance(start.transform.position, goal.transform.position);
-
-        while (openSet.Count > 0)
-        {
-            Waypoint current = openSet[0];
-            foreach (Waypoint wp in openSet)
-            {
-                if (fScore[wp] < fScore[current])
-                    current = wp;
-            }
-
-            if (current == goal)
-                return ReconstructPath(cameFrom, current);
-
-            openSet.Remove(current);
-
-            foreach (Waypoint neighbor in current.neighbors)
-            {
-                float tentativeG = gScore[current] + Vector2.Distance(current.transform.position, neighbor.transform.position);
-
-                if (tentativeG < gScore[neighbor])
-                {
-                    cameFrom[neighbor] = current;
-                    gScore[neighbor] = tentativeG;
-                    fScore[neighbor] = tentativeG + Vector2.Distance(neighbor.transform.position, goal.transform.position);
-
-                    if (!openSet.Contains(neighbor))
-                        openSet.Add(neighbor);
-                }
-            }
-        }
-
-        return new List<Waypoint>(); // No path found
-    }
-
-    List<Waypoint> ReconstructPath(Dictionary<Waypoint, Waypoint> cameFrom, Waypoint current)
-    {
-        List<Waypoint> totalPath = new List<Waypoint> { current };
-        while (cameFrom.ContainsKey(current))
-        {
-            current = cameFrom[current];
-            totalPath.Insert(0, current);
-        }
-        return totalPath;
     }
 }
