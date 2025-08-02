@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SecurityKey : MonoBehaviour
+public class MainKey : MonoBehaviour
 {
     private bool playerInRange = false;
-    public PlayerSecurityDoor playerSecurityKey;
+    public PlayerMainDoor playerMainKey;
     void Start()
     {
         
@@ -15,7 +15,7 @@ public class SecurityKey : MonoBehaviour
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
-            playerSecurityKey.hasAllFourKey += 1f;
+            playerMainKey.hasKey = true;
             Destroy(gameObject);
         }
     }
@@ -25,7 +25,7 @@ public class SecurityKey : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             playerInRange = true;
-            playerSecurityKey = collision.GetComponent<PlayerSecurityDoor>();
+            playerMainKey = collision.GetComponent<PlayerMainDoor>();
         }
     }
     
@@ -34,7 +34,7 @@ public class SecurityKey : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             playerInRange = false;
-            playerSecurityKey = null;
+            playerMainKey = null;
         }
     }
 }

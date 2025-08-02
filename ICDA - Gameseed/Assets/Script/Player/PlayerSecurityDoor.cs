@@ -23,7 +23,7 @@ public class PlayerSecurityDoor : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("MainDoor") && hasAllFourKey == 4f)
+        if (other.CompareTag("SecurityDoor") && hasAllFourKey == 4f)
         {
             canEnter = true;
             doorInRange = other.gameObject;
@@ -37,7 +37,7 @@ public class PlayerSecurityDoor : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.CompareTag("TheDoor"))
+        if (other.CompareTag("SecurityDoor"))
         {
             other.GetComponent<SpriteRenderer>().enabled = true;
             other.GetComponent<BoxCollider2D>().enabled = true;

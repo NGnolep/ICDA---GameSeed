@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerMainDoor : MonoBehaviour
 {
     private bool canEnter = false;
-    private bool hasKey = false;
+    public bool hasKey = false;
     private GameObject doorInRange;
 
     void Update()
