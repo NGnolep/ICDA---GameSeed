@@ -7,6 +7,7 @@ public class SanityItem : MonoBehaviour
     public float sanityRestoreAmount = 20f;
     private bool playerInRange = false;
     private PlayerBar playerBar;
+    public SanitySpawner SaneSpawn;
     void Start()
     {
 
@@ -18,6 +19,7 @@ public class SanityItem : MonoBehaviour
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             playerBar.RegainSanity(sanityRestoreAmount);
+            SaneSpawn.recharging();
             Destroy(gameObject);
         }
     }
