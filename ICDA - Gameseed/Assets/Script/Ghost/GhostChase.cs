@@ -45,7 +45,7 @@ public class GhostChase : MonoBehaviour
         float distance = Vector2.Distance(transform.position, player.position);
         UpdateFade(distance);
 
-        if (distance < chaseDistance && See)
+        if (distance < chaseDistance && See && bar.currentSanity < 40f )
         {
             if (!isChasing)
             {

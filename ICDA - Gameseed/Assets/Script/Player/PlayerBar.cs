@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class PlayerBar : MonoBehaviour
 {
     public float maxSanity = 100f;
@@ -18,23 +18,26 @@ public class PlayerBar : MonoBehaviour
     public bool isBeingChased = false;
     public float chaseSanityMultiplier = 3f;
     private Coroutine regenCoroutine;
+    public Slider sanitySlider;
+    public Slider staminaSlider;
     void Start()
     {
         currentSanity = initialSanity;
         currentStamina = initialStamina;
 
-        //sanitySlider.maxValue = maxSanity;
-        //staminaSlider.maxValue = maxStamina;
+        sanitySlider.maxValue = maxSanity;
+        staminaSlider.maxValue = maxStamina;
+
+        sanitySlider.value = currentSanity;
+        staminaSlider.value = currentStamina;
     }
     void Update()
     {
         float drainRate = isBeingChased ? sanityDegradeRate * chaseSanityMultiplier : sanityDegradeRate;
         currentSanity -= drainRate * Time.deltaTime;
-        //Debug.Log(currentSanity);
-        //Debug.Log(drainRate);
         currentSanity = Mathf.Clamp(currentSanity, 0, maxSanity);
-        //Debug.Log(currentSanity);
-        //sanitySlider.value = currentSanity;
+        sanitySlider.value = currentSanity;
+        staminaSlider.value = currentStamina;
     }
 
     public void UseStamina(float amount)
@@ -61,7 +64,7 @@ public class PlayerBar : MonoBehaviour
         {
             currentStamina += staminaRegenRate * Time.deltaTime;
             currentStamina = Mathf.Clamp(currentStamina, 0f, maxStamina);
-            //staminaSlider.value = currentStamina;
+            staminaSlider.value = currentStamina;
             yield return null; 
         }
 

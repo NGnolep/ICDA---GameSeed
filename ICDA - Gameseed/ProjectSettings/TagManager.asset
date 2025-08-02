@@ -53,3 +53,6 @@ TagManager:
   - name: World
     uniqueID: 3672834603
     locked: 0
+  - name: Particle
+    uniqueID: 3871681415
+    locked: 0
