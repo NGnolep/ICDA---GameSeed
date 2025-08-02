@@ -8,6 +8,8 @@ TagManager:
   - TheLocker
   - TheDoor
   - Griddy
+  - MainDoor
+  - SecurityDoor
   layers:
   - Default
   - TransparentFX
