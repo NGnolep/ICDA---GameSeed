@@ -8,9 +8,13 @@ public class SanityItem : MonoBehaviour
     private bool playerInRange = false;
     private PlayerBar playerBar;
     public SanitySpawner SaneSpawn;
+
+    public AudioClip pillSound;
+
+    private AudioSource audioSource;
     void Start()
     {
-
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -20,6 +24,7 @@ public class SanityItem : MonoBehaviour
         {
             playerBar.RegainSanity(sanityRestoreAmount);
             SaneSpawn.recharging();
+            audioSource.PlayOneShot(pillSound);
             Destroy(gameObject);
         }
     }

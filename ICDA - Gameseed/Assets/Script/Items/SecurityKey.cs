@@ -6,9 +6,12 @@ public class SecurityKey : MonoBehaviour
 {
     private bool playerInRange = false;
     public PlayerSecurityDoor playerSecurityKey;
+    public AudioClip SecureKeySound;
+
+    private AudioSource audioSource;
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -16,6 +19,7 @@ public class SecurityKey : MonoBehaviour
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             playerSecurityKey.hasAllFourKey += 1f;
+            audioSource.PlayOneShot(SecureKeySound);
             Destroy(gameObject);
         }
     }

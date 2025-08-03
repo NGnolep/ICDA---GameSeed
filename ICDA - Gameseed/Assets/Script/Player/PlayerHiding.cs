@@ -10,12 +10,16 @@ public class PlayerHiding : MonoBehaviour
     public bool hiding = false;
     public GhostChase GhostScript;
     public bool NowHide = false;
+    public AudioClip CabinetSound;
+
+    private AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
     {
         rend = GetComponent<SpriteRenderer>();
         coll = GetComponent<Collider2D>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -25,6 +29,7 @@ public class PlayerHiding : MonoBehaviour
         {
             NowHide = true;
             coll.enabled = false;
+            audioSource.PlayOneShot(CabinetSound);
         }
         else if (Input.GetKeyDown(KeyCode.E) && NowHide)
         {
@@ -34,6 +39,7 @@ public class PlayerHiding : MonoBehaviour
             //Debug.Log("not hiding");
             GhostScript.See = true;
             coll.enabled = true;
+            audioSource.PlayOneShot(CabinetSound);
         }
 
         if (NowHide)
