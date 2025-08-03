@@ -1,12 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMainDoor : MonoBehaviour
 {
     private bool canEnter = false;
     public bool hasKey = false;
     private GameObject doorInRange;
+    public AudioClip DoorSound;
+
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     void Update()
     {
@@ -17,6 +26,8 @@ public class PlayerMainDoor : MonoBehaviour
                 doorInRange.GetComponent<SpriteRenderer>().enabled = false;
                 doorInRange.GetComponent<BoxCollider2D>().enabled = false;
                 Debug.Log("Door Opened");
+                audioSource.PlayOneShot(DoorSound);
+                SceneManager.LoadScene("Win Scene");
             }
         }
     }

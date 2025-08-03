@@ -6,9 +6,12 @@ public class MainKey : MonoBehaviour
 {
     private bool playerInRange = false;
     public PlayerMainDoor playerMainKey;
+    public AudioClip MainKeySound;
+
+    private AudioSource audioSource;
     void Start()
     {
-        
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
@@ -16,6 +19,7 @@ public class MainKey : MonoBehaviour
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
             playerMainKey.hasKey = true;
+            audioSource.PlayOneShot(MainKeySound);
             Destroy(gameObject);
         }
     }

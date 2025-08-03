@@ -20,6 +20,9 @@ public class PlayerBar : MonoBehaviour
     private Coroutine regenCoroutine;
     public Slider sanitySlider;
     public Slider staminaSlider;
+    public AudioClip StaminaSound;
+
+    private AudioSource audioSource;
     void Start()
     {
         currentSanity = initialSanity;
@@ -30,6 +33,7 @@ public class PlayerBar : MonoBehaviour
 
         sanitySlider.value = currentSanity;
         staminaSlider.value = currentStamina;
+        audioSource = GetComponent<AudioSource>();
     }
     void Update()
     {
@@ -38,10 +42,13 @@ public class PlayerBar : MonoBehaviour
         currentSanity = Mathf.Clamp(currentSanity, 0, maxSanity);
         sanitySlider.value = currentSanity;
         staminaSlider.value = currentStamina;
+        
     }
 
     public void UseStamina(float amount)
     {
+        
+
         currentStamina -= amount;
         currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
         if (regenCoroutine != null)
@@ -59,6 +66,10 @@ public class PlayerBar : MonoBehaviour
     }
     private IEnumerator RegenerateStamina()
     {
+        if(currentStamina <= 0.1)
+        {
+            audioSource.PlayOneShot(StaminaSound);
+        }
         yield return new WaitForSeconds(3f);
         while (!Input.GetKey(KeyCode.LeftShift) && currentStamina < maxStamina)
         {

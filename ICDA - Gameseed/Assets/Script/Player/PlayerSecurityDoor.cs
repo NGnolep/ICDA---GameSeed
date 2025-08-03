@@ -7,6 +7,14 @@ public class PlayerSecurityDoor : MonoBehaviour
     private bool canEnter = false;
     public float hasAllFourKey;
     private GameObject doorInRange;
+    public AudioClip DoorSound;
+
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
 
     void Update()
     {
@@ -17,6 +25,7 @@ public class PlayerSecurityDoor : MonoBehaviour
                 doorInRange.GetComponent<SpriteRenderer>().enabled = false;
                 doorInRange.GetComponent<BoxCollider2D>().enabled = false;
                 Debug.Log("Door Opened");
+                audioSource.PlayOneShot(DoorSound);
             }
         }
     }

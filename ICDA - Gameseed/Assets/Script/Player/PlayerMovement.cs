@@ -14,12 +14,16 @@ public class PlayerMovement : MonoBehaviour
     public PlayerHiding hid;
     private Animator animator;
     private Coroutine regenCoroutine;
+    public AudioClip walkSound;
+
+    private AudioSource audioSource;
 
     public void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         hid = GetComponent<PlayerHiding>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     public void Update()
@@ -28,11 +32,13 @@ public class PlayerMovement : MonoBehaviour
         {
             currentSpeed = sprintSpeed;
             bar.UseStamina(10f * Time.deltaTime);
+            
             //Debug.Log(bar.currentStamina);
         }
         else
         {
             currentSpeed = moveSpeed;
+            
             //Debug.Log(bar.currentStamina);
         }
         movement.x = Input.GetAxisRaw("Horizontal");
@@ -50,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat("MoveX", movement.x);
             animator.SetFloat("MoveY", movement.y);
             animator.SetBool("isMoving", movement.magnitude > 0.01f);
-
+           
         }
 
 
@@ -62,6 +68,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Vector2 finalVelocity = new Vector2(movement.x * horizontalMultiplier, movement.y);
             rb.velocity = finalVelocity * currentSpeed;
+            
         }
         else
         {

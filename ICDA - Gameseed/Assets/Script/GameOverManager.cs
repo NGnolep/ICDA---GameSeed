@@ -9,9 +9,13 @@ public class GameOverManager : MonoBehaviour
     public Image redScreen;
     public Animator gameOverAnimator;
     public GameObject gameOverPanel;
+    public AudioClip JumpScareSound;
+
+    private AudioSource audioSource;
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
         StartCoroutine(HandleGameOverSequence());
     }
 
@@ -25,7 +29,9 @@ public class GameOverManager : MonoBehaviour
 
         gameOverAnimator.SetTrigger("JumpScare");
 
-        yield return new WaitForSeconds(0.5f);
+        audioSource.PlayOneShot(JumpScareSound);
+
+        yield return new WaitForSeconds(3f);
 
         gameOverPanel.SetActive(true);
     }
