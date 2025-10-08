@@ -25,7 +25,7 @@ Here are some of the main mechanic in this game
 <br>
 
 ## About
-Yggdrasils Rebirth is a typing game that test the player comprehension skills and typing skill as it has runic text in it. 
+Haunting Echoes is a 2D horror game that makes you wonder what is happening and if you are alone or not in this game.
 <br>
 
 ## Developer & Contributions
