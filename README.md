@@ -25,11 +25,11 @@ Here are some of the main mechanic in this game
 <br>
 
 ## About
-Haunting Echoes is a 2D horror game that makes you wonder what is happening and if you are alone or not in this game.
+Haunting Echoes is a 2D horror game that makes you wonder what is happening and if you are alone or not in this game. You gotta survive, hide and search for clues around the map to find what is happening. 
 <br>
 
 ## Developer & Contributions
-- Nhoel Goei (Game Programmer)
+- Nhoel Goei (Gameplay(Enemy, Player), Cutscene/transition, Item Behavior Programmer)
 - Clifftoven Wicaksono (Game Programmer)
 - Pieter Nathanael (Sound Artist)
 - Nelvin Anderson (Game Designer)
