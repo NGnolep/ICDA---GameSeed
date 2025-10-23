@@ -38,7 +38,7 @@ Haunting Echoes is a 2D horror game that makes you wonder what is happening and 
 <br>
 
 ```
-├── ICDA---GameSeed                   # Contain everything needed for Please Survive to works.
+├── ICDA---GameSeed                   # Contain everything needed for Haunting Echoes to works.
    ├── .vscode                        # Contains configuration files for Visual Studio Code (VSCode) when it's used as the code editor for the project.
       ├── extensions.json             # Contains settings and configurations for debugging, code formatting, and IntelliSense. This folder is related to Visual Studio Code integration.
       ├── launch.json                 # Contains the configuration necessary to start debugging Unity C# scripts within VSCode.                     
